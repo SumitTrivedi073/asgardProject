@@ -3,7 +3,7 @@
 
 import 'bound.dart';
 import '../direction_model/leg.dart';
-import '../direction_model/polyline.dart';
+import 'polyline.dart';
 
 class Route {
   Route({

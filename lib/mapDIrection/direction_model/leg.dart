@@ -1,6 +1,6 @@
 
 
-import '../direction_model/distance.dart';
+import 'distance.dart';
 import 'northeast.dart';
 import '../direction_model/step.dart';
 

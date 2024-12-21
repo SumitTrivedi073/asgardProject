@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:asgard_project/Util/uiwidget/CommonTextWidget.dart';
+import 'package:asgard_project/Util/utility.dart';
 import 'package:asgard_project/productList/productList.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -9,25 +10,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+
 import '../theme/color.dart';
 import '../theme/string.dart';
 import '../web_service/APIDirectory.dart';
 import 'direction_model/directionModel.dart';
 
-class MapDirectionWidgetOnRide extends StatefulWidget {
+class MapDirectionWidget extends StatefulWidget {
   ProductList? productList;
   Position? currentPosition;
 
-  MapDirectionWidgetOnRide(
+  MapDirectionWidget(
       {Key? key, required this.productList, required this.currentPosition})
       : super(key: key);
 
   @override
-  _MapDirectionWidgetOnRideState createState() =>
-      _MapDirectionWidgetOnRideState();
+  _MapDirectionWidgetState createState() => _MapDirectionWidgetState();
 }
 
-class _MapDirectionWidgetOnRideState extends State<MapDirectionWidgetOnRide>
+class _MapDirectionWidgetState extends State<MapDirectionWidget>
     with TickerProviderStateMixin {
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
@@ -73,101 +74,40 @@ class _MapDirectionWidgetOnRideState extends State<MapDirectionWidgetOnRide>
 
   @override
   void initState() {
-    //fetch direction polylines from Google API
     super.initState();
     _sessionToken = uuid.v4();
     addMarker();
-    getDirections();
-  }
-
-  getDirections() async {
-    String request =
-        '$directionBaseURL?origin=${pickupLocation.latitude},${pickupLocation.longitude}&destination=${destinationLocation.latitude},${destinationLocation.longitude}&mode=driving&transit_routing_preference=less_driving&sessiontoken=$_sessionToken&key=$googleAPiKey';
-    var url = Uri.parse(request);
-    print("url=====>${url}");
-    dynamic response = await http.get(url);
-    if (response != null && response != null) {
-      if (response.statusCode == 200) {
-        DirectionModel directionModel =
-            DirectionModel.fromJson(json.decode(response.body));
-        List<PointLatLng> pointLatLng = [];
-
-        if (directionModel.routes.isNotEmpty) {
-          for (var i = 0; i < directionModel.routes.length; i++) {
-            for (var j = 0; j < directionModel.routes[i].legs.length; j++) {
-              for (var k = 0;
-                  k < directionModel.routes[i].legs[j].steps.length;
-                  k++) {
-                pointLatLng = polylinePoints.decodePolyline(
-                    directionModel.routes[i].legs[j].steps[k].polyline.points);
-                for (var point in pointLatLng) {
-                  polylineCoordinates
-                      .add(LatLng(point.latitude, point.longitude));
-                }
-              }
-            }
-            setState(() {
-              addPolyLine(polylineCoordinates);
-              isLoading = false;
-            });
-          }
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-        }
+    Utility().checkInternetConnection().then((connectionResult) {
+      if (connectionResult) {
+        getDirections();
       } else {
-        throw Exception('Failed to load predictions');
+       Utility().showInSnackBar(value: checkInternetConnection, context: context);
       }
-    }
+    });
   }
 
-  addPolyLine(List<LatLng> polylineCoordinates) {
-    PolylineId id = const PolylineId("poly");
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: AppColor.themeColor,
-      points: polylineCoordinates,
-      width: 5,
-    );
-    polylines[id] = polyline;
-  }
 
   @override
   Widget build(BuildContext context) {
     final googleMap = StreamBuilder<List<Marker>>(
         stream: mapMarkerStream,
         builder: (context, snapshot) {
-          return GoogleMap(
-            //    mapType: MapType.normal,
-            initialCameraPosition: CameraPosition(
-              //innital position in map
-              target: pickupLocation, //initial position
-              zoom: 15.0, //initial zoom level
-            ),
-            polylines: Set<Polyline>.of(polylines.values),
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            mapToolbarEnabled: false,
-            myLocationEnabled: false,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            onMapCreated: (GoogleMapController controller) {
-              mapController = controller;
-            },
-            markers: Set<Marker>.of(snapshot.data ?? []),
-            padding: const EdgeInsets.all(8),
-          );
+          return MapWidget();
         });
 
     return Scaffold(
-      appBar: AppBar(title: CommonTextWidget(textval: directionScreen, colorval: Colors.white,
-          sizeval: 16, fontWeight: FontWeight.bold),
-      backgroundColor: AppColor.themeColor,
+      appBar: AppBar(
+        title: CommonTextWidget(
+            textval: directionScreen,
+            colorval: Colors.white,
+            sizeval: 16,
+            fontWeight: FontWeight.bold),
+        backgroundColor: AppColor.themeColor,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
-        ), ),
+        ),
+      ),
       body: Stack(
         children: [
           isLoading
@@ -178,7 +118,7 @@ class _MapDirectionWidgetOnRideState extends State<MapDirectionWidgetOnRide>
                   ? googleMap
                   : Center(
                       child: CommonTextWidget(
-                          textval: "Route Not Found",
+                          textval: routeNotFound,
                           colorval: Colors.black,
                           sizeval: 14,
                           fontWeight: FontWeight.w600),
@@ -188,12 +128,25 @@ class _MapDirectionWidgetOnRideState extends State<MapDirectionWidgetOnRide>
     );
   }
 
-  @override
-  void dispose() {
-    if (mapController != null) {
-      mapController!.dispose();
-    }
-    super.dispose();
+  Widget MapWidget() {
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        //innital position in map
+        target: pickupLocation, //initial position
+        zoom: 15.0, //initial zoom level
+      ),
+      polylines: Set<Polyline>.of(polylines.values),
+      rotateGesturesEnabled: false,
+      tiltGesturesEnabled: false,
+      mapToolbarEnabled: false,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      onMapCreated: (GoogleMapController controller) {
+        mapController = controller;
+      },
+      padding: const EdgeInsets.all(8),
+    );
   }
 
   addMarker() async {
@@ -227,5 +180,66 @@ class _MapDirectionWidgetOnRideState extends State<MapDirectionWidgetOnRide>
     markers.add(pickupMarker);
     markers.add(destinationMarker);
     mapMarkerSink.add(markers);
+  }
+
+  addPolyLine(List<LatLng> polylineCoordinates) {
+    PolylineId id = const PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: AppColor.themeColor,
+      points: polylineCoordinates,
+      width: 5,
+    );
+    polylines[id] = polyline;
+  }
+
+  getDirections() async {
+    String request =
+        '$directionBaseURL?origin=${pickupLocation.latitude},${pickupLocation.longitude}&destination=${destinationLocation.latitude},${destinationLocation.longitude}&mode=driving&transit_routing_preference=less_driving&sessiontoken=$_sessionToken&key=$googleAPiKey';
+    var url = Uri.parse(request);
+    dynamic response = await http.get(url);
+    if (response != null && response != null) {
+      if (response.statusCode == 200) {
+        DirectionModel directionModel =
+        DirectionModel.fromJson(json.decode(response.body));
+        List<PointLatLng> pointLatLng = [];
+
+        if (directionModel.routes.isNotEmpty) {
+          for (var i = 0; i < directionModel.routes.length; i++) {
+            for (var j = 0; j < directionModel.routes[i].legs.length; j++) {
+              for (var k = 0;
+              k < directionModel.routes[i].legs[j].steps.length;
+              k++) {
+                pointLatLng = polylinePoints.decodePolyline(
+                    directionModel.routes[i].legs[j].steps[k].polyline.points);
+                for (var point in pointLatLng) {
+                  polylineCoordinates
+                      .add(LatLng(point.latitude, point.longitude));
+                }
+              }
+            }
+            setState(() {
+              addPolyLine(polylineCoordinates);
+              isLoading = false;
+            });
+          }
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        throw Exception('Failed to load predictions');
+      }
+    }
+  }
+
+
+  @override
+  void dispose() {
+    if (mapController != null) {
+      mapController!.dispose();
+    }
+    super.dispose();
   }
 }

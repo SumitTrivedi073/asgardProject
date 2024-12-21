@@ -1,8 +1,8 @@
 
 
 import 'distance.dart';
-import '../direction_model/northeast.dart';
-import '../direction_model/polyline.dart';
+import 'northeast.dart';
+import 'polyline.dart';
 
 class Step {
   Step({

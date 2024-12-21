@@ -37,9 +37,11 @@ class ProductController extends GetxController {
             data.map((json) => ProductList.fromJson(json)).toList();
       } else {
         Get.snackbar('Error', 'Failed to fetch products');
+        isLoading(false);
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch products');
+      isLoading(false);
     } finally {
       isLoading(false);
     }
