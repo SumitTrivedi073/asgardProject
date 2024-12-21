@@ -1,11 +1,14 @@
 
 import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
+import 'package:asgard_project/Util/uiwidget/CommonTextWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:one_context/one_context.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/color.dart';
@@ -14,8 +17,7 @@ import '../theme/string.dart';
 class Utility {
 
   bool isActiveConnection = false;
-   Future<bool> checkInternetConnection() async {
-
+   Future<bool> checkInternetConnectivity() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -83,6 +85,31 @@ class Utility {
          width: 50,
          fit: BoxFit.cover
      );
+  }
+
+  void InternetConnDialogue() {
+    OneContext().dialog.showDialog(
+      builder: (context) => AlertDialog(
+        title: CommonTextWidget(textval: "Network Connectivity",
+            colorval: AppColor.themeColor, sizeval: 14, fontWeight: FontWeight.bold),
+        content: CommonTextWidget(textval: checkInternetConnection,colorval: AppColor.grey, sizeval: 12, fontWeight: FontWeight.normal
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Close the dialog
+            child: CommonTextWidget(textval:cancel,colorval: AppColor.darkGrey,sizeval: 12,fontWeight: FontWeight.bold),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              AppSettings.openAppSettings(type: AppSettingsType.wifi);// Close the dialog
+              // Optionally navigate to settings
+            },
+            child: CommonTextWidget(textval: enable,colorval: AppColor.themeColor,sizeval: 12,fontWeight: FontWeight.bold,),
+          ),
+        ],
+      ),
+    );
   }
 
 }

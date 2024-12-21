@@ -17,16 +17,11 @@ class ProductController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    Utility().checkInternetConnection().then((connectionResult) {
-      if (connectionResult) {
         fetchProducts();
-      } else {
-        Get.snackbar('Error', checkInternetConnection);
-      }
-    });
   }
 
   Future<void> fetchProducts() async {
+    products = <ProductList>[].obs;
     isLoading(true);
     try {
       final response = await http.get(getproductList());
@@ -36,11 +31,11 @@ class ProductController extends GetxController {
         products.value =
             data.map((json) => ProductList.fromJson(json)).toList();
       } else {
-        Get.snackbar('Error', 'Failed to fetch products');
+     //   Get.snackbar('Error', 'Failed to fetch products');
         isLoading(false);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch products');
+     // Get.snackbar('Error', 'Failed to fetch products');
       isLoading(false);
     } finally {
       isLoading(false);

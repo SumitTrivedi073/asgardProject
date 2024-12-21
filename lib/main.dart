@@ -46,7 +46,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final ProductController controller = Get.put(ProductController());
   final GPSTracker gpsTracker = GPSTracker();
   Position? currentPosition;
@@ -59,69 +59,126 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final GoogleMapsFlutterPlatform mapsImplementation =
         GoogleMapsFlutterPlatform.instance;
     if (mapsImplementation is GoogleMapsFlutterAndroid) {
       mapsImplementation.useAndroidViewSurface = true;
     }
-    getCurrentLocation();
+
+    Utility().checkInternetConnectivity().then((connectionResult) {
+      if (connectionResult) {
+        getCurrentLocation();
+      } else {
+        Utility().InternetConnDialogue();
+        Utility()
+            .showInSnackBar(value: checkInternetConnection, context: context);
+      }
+    });
   }
 
   Future<void> getCurrentLocation() async {
     try {
       isLocationEnabled = await gpsTracker.isLocationServiceEnabled();
-           if(isLocationEnabled) {
-             Position? position = await gpsTracker.getCurrentPosition();
-             setState(() {
-               currentPosition = position!;
+      if (isLocationEnabled) {
+        Position? position = await gpsTracker.getCurrentPosition();
+        setState(() {
+          currentPosition = position!;
 
-               _cameraPosition = CameraPosition(
-                 bearing: 0,
-                 target: LatLng(position.latitude, position.longitude),
-                 zoom: 15.0,
-               );
-               if (mapController != null) {
-                 mapController
-                     ?.animateCamera(
-                     CameraUpdate.newCameraPosition(_cameraPosition!));
-               }
-             });
-           }else{
-             gpsTracker.locationEnabledDialogue();
-           }
+          _cameraPosition = CameraPosition(
+            bearing: 0,
+            target: LatLng(position.latitude, position.longitude),
+            zoom: 15.0,
+          );
+          if (mapController != null) {
+            mapController?.animateCamera(
+                CameraUpdate.newCameraPosition(_cameraPosition!));
+          }
+        });
+      } else {
+        gpsTracker.locationEnabledDialogue();
+      }
     } catch (e) {
       await gpsTracker.getCurrentPosition();
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: CommonTextWidget(textval: appName,
-          colorval: Colors.white, sizeval: 14, fontWeight: FontWeight.bold),// TextStyle
+      appBar: AppBar(
+          title: CommonTextWidget(
+              textval: appName,
+              colorval: Colors.white,
+              sizeval: 14,
+              fontWeight: FontWeight.bold),
+          // TextStyle
 
-      backgroundColor: AppColor.themeColor),
-      body:  homeView(), // This trailing comma makes auto-formatting nicer for build methods.
+          backgroundColor: AppColor.themeColor),
+      body: RefreshIndicator(
+        backgroundColor: AppColor.themeColor,
+         color: Colors.white,
+          onRefresh: () async {
+            await Future.delayed(Duration(seconds: 2));
+            controller.fetchProducts();
+            setState(() {
+
+            });
+          }, // Trigger the refresh function;
+          child:  homeView(),),
     );
+    // Function that will be called when
+    // user pulls the ListView downward
+  }
+
+  homeView() {
+    return currentPosition != null &&
+            currentPosition!.latitude.toString().isNotEmpty
+        ? Obx(() {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+              Container(height: MediaQuery.of(context).size.height/2.6,
+              child:  listView(),),
+              Container(height: MediaQuery.of(context).size.height/2,
+                child:  Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+                  MapView(),
+                  curentLocationMarker(),
+                  currentLocationBtn(),
+
+                ]),),
+            ],);
+          })
+        : SizedBox();
   }
 
   Widget listView() {
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          height: MediaQuery.of(context).size.height / 2.5,
+      alignment: Alignment.topCenter,
+      child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: ListView.builder(
-            itemCount: controller.products.length,
-            itemBuilder: (context, index) {
-              return ListItem(controller.products[index]);
-            },
-          ),
-        ));
+          child: controller.products.isNotEmpty
+              ? ListView.builder(
+                  itemCount: controller.products.length,
+                  itemBuilder: (context, index) {
+                    return ListItem(controller.products[index]);
+                  },
+                )
+              : Center(
+                  child: CommonTextWidget(
+                  textval: noProductAvailable,
+                  colorval: AppColor.blackColor,
+                  sizeval: 14,
+                  fontWeight: FontWeight.w600,
+                ))),
+    );
   }
 
   Widget ListItem(ProductList product) {
@@ -248,40 +305,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App has resumed, check location status
+      getCurrentLocation();
+    }
+  }
+
+  @override
   void dispose() {
     if (mapController != null) {
       mapController!.dispose();
     }
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  homeView() {
-
-   return currentPosition != null &&
-        currentPosition!.latitude.toString().isNotEmpty
-        ? Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (controller.products.isEmpty) {
-        return Center(
-            child: CommonTextWidget(
-              textval: noProductAvailable,
-              colorval: AppColor.blackColor,
-              sizeval: 14,
-              fontWeight: FontWeight.w600,
-            ));
-      }
-
-      return Stack(alignment: Alignment.centerRight, children: <Widget>[
-        MapView(),
-        curentLocationMarker(),
-        currentLocationBtn(),
-        listView(),
-      ]);
-    })
-        : const Center(
-      child: CircularProgressIndicator(),
-    );
   }
 }

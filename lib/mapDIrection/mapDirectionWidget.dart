@@ -28,8 +28,7 @@ class MapDirectionWidget extends StatefulWidget {
   _MapDirectionWidgetState createState() => _MapDirectionWidgetState();
 }
 
-class _MapDirectionWidgetState extends State<MapDirectionWidget>
-    with TickerProviderStateMixin {
+class _MapDirectionWidgetState extends State<MapDirectionWidget> {
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
   String googleAPiKey = GoogleApiKey;
@@ -77,10 +76,11 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget>
     super.initState();
     _sessionToken = uuid.v4();
     addMarker();
-    Utility().checkInternetConnection().then((connectionResult) {
+    Utility().checkInternetConnectivity().then((connectionResult) {
       if (connectionResult) {
         getDirections();
       } else {
+        Utility().InternetConnDialogue();
        Utility().showInSnackBar(value: checkInternetConnection, context: context);
       }
     });
