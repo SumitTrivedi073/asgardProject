@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         backgroundColor: AppColor.themeColor,
          color: Colors.white,
           onRefresh: () async {
-            await Future.delayed(Duration(seconds: 2));
+            await Future.delayed(const Duration(seconds: 2));
             controller.fetchProducts();
             setState(() {
 
@@ -139,9 +139,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-              Container(height: MediaQuery.of(context).size.height/2.6,
+              SizedBox(height: MediaQuery.of(context).size.height/2.6,
               child:  listView(),),
-              Container(height: MediaQuery.of(context).size.height/2,
+              SizedBox(height: MediaQuery.of(context).size.height/2,
                 child:  Stack(alignment: Alignment.bottomCenter, children: <Widget>[
                   MapView(),
                   curentLocationMarker(),
@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ]),),
             ],);
           })
-        : SizedBox();
+        : const SizedBox();
   }
 
   Widget listView() {
