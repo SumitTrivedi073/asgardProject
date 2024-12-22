@@ -263,8 +263,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             product.coordinates[1],
           ),
           infoWindow: InfoWindow(
+
             title: product.title,
             snippet: product.body,
+            onTap: (){
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) => MapDirectionWidget(
+                        productList: product,
+                        currentPosition: currentPosition,
+                      )),
+                      (Route<dynamic> route) => true);
+            }
           ),
         );
       }).toSet(),
@@ -303,6 +313,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ),
     );
   }
+
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

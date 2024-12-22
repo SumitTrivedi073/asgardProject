@@ -11,3 +11,4 @@ var enable = "Enable";
 var locationServiceDis = "Location services are disabled.";
 var locationPerDeni = "Location permissions are denied.";
 var locationPerDesc = "Location permissions are permanently denied. Please enable them in settings.";
+var networkConnectivity = "Network Connectivity";

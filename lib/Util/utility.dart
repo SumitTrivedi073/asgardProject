@@ -64,11 +64,6 @@ class Utility {
     return endStr;
   }
   double calculateDistance(double lat, double lng,double currentLat, double currentLng) {
-
-    print('userLocation====>${currentLat}');
-    print('userLocation====>${currentLng}');
-    print('lat====>${lat}');
-    print('lng====>${lng}');
     return Geolocator.distanceBetween(
       currentLat,
       currentLng,
@@ -90,7 +85,7 @@ class Utility {
   void InternetConnDialogue() {
     OneContext().dialog.showDialog(
       builder: (context) => AlertDialog(
-        title: CommonTextWidget(textval: "Network Connectivity",
+        title: CommonTextWidget(textval: networkConnectivity,
             colorval: AppColor.themeColor, sizeval: 14, fontWeight: FontWeight.bold),
         content: CommonTextWidget(textval: checkInternetConnection,colorval: AppColor.grey, sizeval: 12, fontWeight: FontWeight.normal
         ),

@@ -44,16 +44,16 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
           ? widget.currentPosition!.longitude
           : 75.83306003160679);
 
-  /* late LatLng destinationLocation = LatLng(
+  late LatLng destinationLocation = LatLng(
       (widget.productList!.coordinates[0] != null)
           ? widget.productList!.coordinates[0]
           : 22.650996848327292,
       (widget.productList!.coordinates[1] != null)
           ? widget.productList!.coordinates[1]
-          : 75.83306003160679);*/
+          : 75.83306003160679);
 
-  late LatLng destinationLocation =
-      LatLng(23.002006477422324, 76.07645730410552);
+/*  late LatLng destinationLocation =
+      LatLng(22.991676281686242, 76.08486752671082);*/
 
   final List<Marker> markers = <Marker>[];
   final _mapMarkerSC = StreamController<List<Marker>>();
@@ -81,33 +81,53 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
         getDirections();
       } else {
         Utility().InternetConnDialogue();
-       Utility().showInSnackBar(value: checkInternetConnection, context: context);
+        Utility()
+            .showInSnackBar(value: checkInternetConnection, context: context);
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
     final googleMap = StreamBuilder<List<Marker>>(
         stream: mapMarkerStream,
         builder: (context, snapshot) {
-          return MapWidget();
+          return GoogleMap(
+            //    mapType: MapType.normal,
+            initialCameraPosition: CameraPosition(
+              //innital position in map
+              target: pickupLocation, //initial position
+              zoom: 15.0, //initial zoom level
+            ),
+            polylines: Set<Polyline>.of(polylines.values),
+            rotateGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            mapToolbarEnabled: false,
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            onMapCreated: (GoogleMapController controller) {
+              mapController = controller;
+            },
+            markers: Set<Marker>.of(snapshot.data ?? []),
+            padding: const EdgeInsets.all(8),
+          );
         });
 
     return Scaffold(
       appBar: AppBar(
-        title: CommonTextWidget(
-            textval: directionScreen,
-            colorval: Colors.white,
-            sizeval: 16,
-            fontWeight: FontWeight.bold),
-        backgroundColor: AppColor.themeColor,
+          title: CommonTextWidget(
+              textval: directionScreen,
+              colorval: Colors.white,
+              sizeval: 14,
+              fontWeight: FontWeight.bold),
+          // TextStyle
+
+          backgroundColor: AppColor.themeColor,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
+        ),),
       body: Stack(
         children: [
           isLoading
@@ -116,36 +136,28 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
                 )
               : polylineCoordinates != null && polylineCoordinates.isNotEmpty
                   ? googleMap
-                  : Center(
-                      child: CommonTextWidget(
-                          textval: routeNotFound,
-                          colorval: Colors.black,
-                          sizeval: 14,
-                          fontWeight: FontWeight.w600),
+                  : Container(
+                      child: Stack(
+                        children: [
+                          googleMap,
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              color: AppColor.themeColor,
+                              height: 50,
+                              child: Center(child: CommonTextWidget(
+                                  textval: routeNotFound,
+                                  colorval: AppColor.whiteColor,
+                                  sizeval: 14,
+                                  fontWeight: FontWeight.bold),),
+                            ),
+                          )
+                        ],
+                      ),
                     )
         ],
       ),
-    );
-  }
-
-  Widget MapWidget() {
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(
-        //innital position in map
-        target: pickupLocation, //initial position
-        zoom: 15.0, //initial zoom level
-      ),
-      polylines: Set<Polyline>.of(polylines.values),
-      rotateGesturesEnabled: false,
-      tiltGesturesEnabled: false,
-      mapToolbarEnabled: false,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: (GoogleMapController controller) {
-        mapController = controller;
-      },
-      padding: const EdgeInsets.all(8),
     );
   }
 
@@ -201,15 +213,15 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
     if (response != null && response != null) {
       if (response.statusCode == 200) {
         DirectionModel directionModel =
-        DirectionModel.fromJson(json.decode(response.body));
+            DirectionModel.fromJson(json.decode(response.body));
         List<PointLatLng> pointLatLng = [];
 
         if (directionModel.routes.isNotEmpty) {
           for (var i = 0; i < directionModel.routes.length; i++) {
             for (var j = 0; j < directionModel.routes[i].legs.length; j++) {
               for (var k = 0;
-              k < directionModel.routes[i].legs[j].steps.length;
-              k++) {
+                  k < directionModel.routes[i].legs[j].steps.length;
+                  k++) {
                 pointLatLng = polylinePoints.decodePolyline(
                     directionModel.routes[i].legs[j].steps[k].polyline.points);
                 for (var point in pointLatLng) {
@@ -233,7 +245,6 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
       }
     }
   }
-
 
   @override
   void dispose() {

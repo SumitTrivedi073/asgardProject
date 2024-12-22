@@ -8,7 +8,7 @@ const mobileHost = '192.168.29.211';
 const webBaseUrl = '$scheme://$host:$port';
 const mobileBaseUrl = '$scheme://$mobileHost:$port';
 
-const productionUrl = 'https://mocki.io/v1/6655ddaf-5212-437a-a544-3d2a418985f6';
+const productionUrl = 'https://h2gvbfqo6smwzaby6x7jinzujm0otrjt.lambda-url.eu-west-2.on.aws/';
 const directionBaseURL = 'https://maps.googleapis.com/maps/api/directions/json';
 
 
