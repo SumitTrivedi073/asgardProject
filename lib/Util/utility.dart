@@ -83,28 +83,43 @@ class Utility {
   }
 
   void InternetConnDialogue() {
-    OneContext().dialog.showDialog(
-      builder: (context) => AlertDialog(
-        title: CommonTextWidget(textval: networkConnectivity,
-            colorval: AppColor.themeColor, sizeval: 14, fontWeight: FontWeight.bold),
-        content: CommonTextWidget(textval: checkInternetConnection,colorval: AppColor.grey, sizeval: 12, fontWeight: FontWeight.normal
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Close the dialog
-            child: CommonTextWidget(textval:cancel,colorval: AppColor.darkGrey,sizeval: 12,fontWeight: FontWeight.bold),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              AppSettings.openAppSettings(type: AppSettingsType.wifi);// Close the dialog
-              // Optionally navigate to settings
-            },
-            child: CommonTextWidget(textval: turnOn,colorval: AppColor.themeColor,sizeval: 12,fontWeight: FontWeight.bold,),
-          ),
-        ],
-      ),
-    );
+     if(OneContext.hasContext) {
+       OneContext().dialog.showDialog(
+         builder: (context) =>
+             AlertDialog(
+               title: CommonTextWidget(textval: networkConnectivity,
+                   colorval: AppColor.themeColor,
+                   sizeval: 14,
+                   fontWeight: FontWeight.bold),
+               content: CommonTextWidget(textval: checkInternetConnection,
+                   colorval: AppColor.grey,
+                   sizeval: 12,
+                   fontWeight: FontWeight.normal
+               ),
+               actions: [
+                 TextButton(
+                   onPressed: () => Navigator.pop(context), // Close the dialog
+                   child: CommonTextWidget(textval: cancel,
+                       colorval: AppColor.darkGrey,
+                       sizeval: 12,
+                       fontWeight: FontWeight.bold),
+                 ),
+                 TextButton(
+                   onPressed: () {
+                     Navigator.pop(context);
+                     AppSettings.openAppSettings(
+                         type: AppSettingsType.wifi); // Close the dialog
+                     // Optionally navigate to settings
+                   },
+                   child: CommonTextWidget(textval: turnOn,
+                     colorval: AppColor.themeColor,
+                     sizeval: 12,
+                     fontWeight: FontWeight.bold,),
+                 ),
+               ],
+             ),
+       );
+     }
   }
 
 }
