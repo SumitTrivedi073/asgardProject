@@ -112,20 +112,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               colorval: Colors.white,
               sizeval: 14,
               fontWeight: FontWeight.bold),
-          // TextStyle
-
           backgroundColor: AppColor.themeColor),
       body: RefreshIndicator(
         backgroundColor: AppColor.themeColor,
-         color: Colors.white,
-          onRefresh: () async {
-            await Future.delayed(const Duration(seconds: 2));
-            controller.fetchProducts();
-            setState(() {
-
-            });
-          }, // Trigger the refresh function;
-          child:  homeView(),),
+        color: Colors.white,
+        onRefresh: () async {
+          await Future.delayed(const Duration(seconds: 2));
+          controller.fetchProducts();
+          setState(() {});
+        }, // Trigger the refresh function;
+        child: homeView(),
+      ),
     );
     // Function that will be called when
     // user pulls the ListView downward
@@ -139,46 +136,58 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-              SizedBox(height: MediaQuery.of(context).size.height/2.6,
-              child:  listView(),),
-              SizedBox(height: MediaQuery.of(context).size.height/2,
-                child:  Stack(alignment: Alignment.bottomCenter, children: <Widget>[
-                  MapView(),
-                  curentLocationMarker(),
-                  currentLocationBtn(),
-
-                ]),),
-            ],);
+                Expanded(
+                  child: listView(),
+                ),
+                Expanded(
+                  child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: <Widget>[
+                        MapView(),
+                        curentLocationMarker(),
+                        currentLocationBtn(),
+                      ]),
+                ),
+              ],
+            );
           })
-        : Center(child: CircularProgressIndicator(),);
+        : const Center(
+            child: CircularProgressIndicator(),
+          );
   }
 
   Widget listView() {
     if (controller.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
     }
-    return Align(
-      alignment: Alignment.topCenter,
-      child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: controller.products.isNotEmpty
-              ? ListView.builder(
-                  itemCount: controller.products.length,
-                  itemBuilder: (context, index) {
-                    return ListItem(controller.products[index]);
-                  },
-                )
-              : Center(
-                  child: CommonTextWidget(
-                  textval: noProductAvailable,
-                  colorval: AppColor.blackColor,
-                  sizeval: 14,
-                  fontWeight: FontWeight.w600,
-                ))),
-    );
+    return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: controller.products.isNotEmpty
+            ? ListView.builder(
+                itemCount: controller.products.length,
+                itemBuilder: (context, index) {
+                  return ListItem(controller.products[index]);
+                },
+              )
+            : noProduct());
+  }
+
+  noProduct() {
+    return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+            height: 100,
+            child: Center(
+              child: CommonTextWidget(
+                textval: noProductAvailable,
+                colorval: AppColor.blackColor,
+                sizeval: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            )));
   }
 
   Widget ListItem(ProductList product) {
@@ -263,19 +272,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             product.coordinates[1],
           ),
           infoWindow: InfoWindow(
-
-            title: product.title,
-            snippet: product.body,
-            onTap: (){
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => MapDirectionWidget(
-                        productList: product,
-                        currentPosition: currentPosition,
-                      )),
-                      (Route<dynamic> route) => true);
-            }
-          ),
+              title: product.title,
+              snippet: product.body,
+              onTap: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => MapDirectionWidget(
+                              productList: product,
+                              currentPosition: currentPosition,
+                            )),
+                    (Route<dynamic> route) => true);
+              }),
         );
       }).toSet(),
     );
@@ -314,17 +321,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // App has resumed, check location status
       getCurrentLocation();
       controller = Get.put(ProductController());
-      setState(() {
-
-      });
+      setState(() {});
     }
   }
 
