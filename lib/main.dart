@@ -247,10 +247,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget MapView() {
     return GoogleMap(
-      //    mapType: MapType.normal,
+          mapType: MapType.normal,
       initialCameraPosition: _cameraPosition!,
       onMapCreated: (GoogleMapController controller) {
-        controller.setMapStyle(MapStyle.mapStyles);
+
         mapController = (controller);
         mapController
             ?.animateCamera(CameraUpdate.newCameraPosition(_cameraPosition!));

@@ -158,9 +158,9 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget>with WidgetsBind
       //add start location marker
       markerId: MarkerId(pickupLocation.toString()),
       position: pickupLocation, //position of marker
-      infoWindow: const InfoWindow(
+      infoWindow:  InfoWindow(
         //popup info
-        title: 'Pickup Location',
+        title: pickupLocation_,
       ),
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueGreen), //Icon for Marker
@@ -170,9 +170,9 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget>with WidgetsBind
       //add start location marker
       markerId: MarkerId(destinationLocation.toString()),
       position: destinationLocation, //position of marker
-      infoWindow: const InfoWindow(
+      infoWindow:  InfoWindow(
         //popup info
-        title: 'Destination Location',
+        title: destLocation,
       ),
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueRed), //Icon for Marker

@@ -13,3 +13,5 @@ var locationPerDeni = "Location permissions are denied.";
 var locationPerDesc = "Location permissions are permanently denied. Please enable them in settings.";
 var networkConnectivity = "Network Connectivity";
 var turnOn = "Turn on";
+var pickupLocation_ = "Pickup Location";
+var destLocation = "Destination Location";

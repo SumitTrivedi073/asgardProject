@@ -4,13 +4,9 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:asgard_project/Util/uiwidget/CommonTextWidget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:one_context/one_context.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../theme/color.dart';
 import '../theme/string.dart';
 
