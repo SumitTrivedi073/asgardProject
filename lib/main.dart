@@ -47,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  final ProductController controller = Get.put(ProductController());
+  late ProductController controller = Get.put(ProductController());
   final GPSTracker gpsTracker = GPSTracker();
   Position? currentPosition;
   LatLng? latlong = null;
@@ -321,6 +321,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // App has resumed, check location status
       getCurrentLocation();
+      controller = Get.put(ProductController());
+      setState(() {
+
+      });
     }
   }
 

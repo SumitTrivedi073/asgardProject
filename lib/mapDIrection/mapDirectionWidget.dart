@@ -28,7 +28,7 @@ class MapDirectionWidget extends StatefulWidget {
   _MapDirectionWidgetState createState() => _MapDirectionWidgetState();
 }
 
-class _MapDirectionWidgetState extends State<MapDirectionWidget> {
+class _MapDirectionWidgetState extends State<MapDirectionWidget>with WidgetsBindingObserver {
   GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
   String googleAPiKey = GoogleApiKey;
@@ -74,17 +74,9 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
   @override
   void initState() {
     super.initState();
-    _sessionToken = uuid.v4();
-    addMarker();
-    Utility().checkInternetConnectivity().then((connectionResult) {
-      if (connectionResult) {
-        getDirections();
-      } else {
-        Utility().InternetConnDialogue();
-        Utility()
-            .showInSnackBar(value: checkInternetConnection, context: context);
-      }
-    });
+    WidgetsBinding.instance.addObserver(this);
+
+   init();
   }
 
   @override
@@ -245,12 +237,37 @@ class _MapDirectionWidgetState extends State<MapDirectionWidget> {
       }
     }
   }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App has resumed, check location status
+      init();
+      setState(() {
+
+      });
+    }
+  }
 
   @override
   void dispose() {
     if (mapController != null) {
       mapController!.dispose();
     }
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void init() {
+    _sessionToken = uuid.v4();
+    addMarker();
+    Utility().checkInternetConnectivity().then((connectionResult) {
+      if (connectionResult) {
+        getDirections();
+      } else {
+        Utility().InternetConnDialogue();
+        Utility()
+            .showInSnackBar(value: checkInternetConnection, context: context);
+      }
+    });
   }
 }

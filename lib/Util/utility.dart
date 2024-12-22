@@ -100,7 +100,7 @@ class Utility {
               AppSettings.openAppSettings(type: AppSettingsType.wifi);// Close the dialog
               // Optionally navigate to settings
             },
-            child: CommonTextWidget(textval: enable,colorval: AppColor.themeColor,sizeval: 12,fontWeight: FontWeight.bold,),
+            child: CommonTextWidget(textval: turnOn,colorval: AppColor.themeColor,sizeval: 12,fontWeight: FontWeight.bold,),
           ),
         ],
       ),
