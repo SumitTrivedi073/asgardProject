@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ]),),
             ],);
           })
-        : const SizedBox();
+        : Center(child: CircularProgressIndicator(),);
   }
 
   Widget listView() {
