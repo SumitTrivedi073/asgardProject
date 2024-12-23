@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       title: appName,
       debugShowCheckedModeBanner: false,
       builder: OneContext().builder,
+      navigatorKey: OneContext().key,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
