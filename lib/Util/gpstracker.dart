@@ -6,6 +6,7 @@ import 'package:asgard_project/theme/string.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:one_context/one_context.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GPSTracker {
   // Check if location services are enabled
@@ -27,15 +28,16 @@ class GPSTracker {
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await requestPermission();
-      if (permission == LocationPermission.denied) {
-        Utility().showToast(locationPerDeni);
-      }
-    }
+    var status = await Permission.location.request();
 
-    if (permission == LocationPermission.deniedForever) {
+    if (status.isGranted) {
+      print("Location permission granted");
+    } else if (status.isDenied) {
+      Utility().showToast(locationPerDeni);
+      permission = await requestPermission();
+     } else if (status.isPermanentlyDenied) {
       Utility().showToast(locationPerDesc);
+      openAppSettings(); // Direct the user to app settings
     }
 
     return await Geolocator.getCurrentPosition(

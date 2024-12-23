@@ -81,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Future<void> getCurrentLocation() async {
     try {
       isLocationEnabled = await gpsTracker.isLocationServiceEnabled();
+       print('isLocationEnabled====>$isLocationEnabled');
       if (isLocationEnabled) {
         Position? position = await gpsTracker.getCurrentPosition();
         setState(() {
